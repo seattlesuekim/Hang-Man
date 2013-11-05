@@ -28,23 +28,24 @@ class Board
       return 'computer wins'
     end
     # User has filled out the blanks
-    if not blank.include?('_')
+    if blank.include?('_') == false
       return 'user wins'
     end
-    return state
+    state
   end
 
-  # Where secret and guess are both arrays
+  # Where secret and guess are both strings
   # This method also changes the "blank array"
   def play(secret, guess, blank)
     i = 0
-    while i <= 5
-      if guess[i] == secret[i]
-        blank[i] = secret[i]
+    while i <= secret.length
+      if secret[i] == guess
+        blank[i] = guess
+        i += 1
       else
         add_body_parts(i)
+        break
       end
-      i+= 1
     end
     blank
   end
@@ -71,26 +72,31 @@ class Board
   end
 end
 
-def game_engine
-  game = Board.new
-  puts " the secret word is #{game.pick_random_word}"
-  secret_word_array = game.pick_random_word.scan(/\w/)
+def make_blanks_array(secret_word)
   blanks_array = []
   i = 0
-  while i <= secret_word_array.count
+  while i <= (secret_word.length) / 2
     blanks_array << '_'
     i += 1
   end
+  blanks_array.join(' ')
+end
+
+def game_engine
+  game = Board.new
+  secret_word = game.pick_random_word.scan(/\w/).join(' ')
+  puts "The secret word is #{secret_word}"
+  blanks_array = make_blanks_array(secret_word)
 
   # Game Play
   while game.determine_state(blanks_array) == 'in progress'
-    puts 'Guess the word: '
+    puts 'Guess a letter: '
     puts blanks_array
-    guess = gets.chomp.scan(/\w/)
-    blanks_array = game.play(secret_word_array, guess, blanks_array)
+    guess = gets.chomp
+    blanks_array = game.play(secret_word, guess, blanks_array)
   end
   if game.determine_state(blanks_array) == 'computer wins'
-    puts "Your inability to guess the word #{secret_word_array.to_s} has just killed this stick dude."
+    puts "Your inability to guess the word #{secret_word.to_s} has just killed this stick dude."
   elsif game.determine_state(blanks_array) == 'user wins'
     puts 'Congratulations! You have guessed the word!'
   end
